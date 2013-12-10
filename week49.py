@@ -66,9 +66,11 @@ def mooo(x,y,xrr):
     # For all the inner lists
     for xr in xrr:
         # If x and y meet in the inner list, increase counter.
-        if (x in xr) and (y in xr):
+        if (x in xr) and (y in xr) and (x != y):
             collisions += 1
-
+        # If x or y is more than once in each list return false.
+        if (xr.count(x) > 1) or (xr.count(y) > 1):
+            return False
     # If the counter is >0 they met more than once.
     # If the counter is  0 they never met.
     # If the counter is  1 they met only once.
@@ -156,9 +158,11 @@ def main(args):
     B10 = 'Alice+Bob'
     # A valid test set. (Checking if lists of strings gets parsed correctly)
     B11 = ["he","ej","hj"]
+    # An invalid test set. (they all meet themselves)
+    B12 = [[0,1], [0,2], [1,2], [0,0], [1,1], [2,2]] 
 
     # Print the results of the tests.
-    print "Test ##: Expectation / Result"
+    print "Test ##: Facit / Result"
     print "===================="
     print "Test 01: True  / " + str(is_BS(B1))
     print "Test 02: False / " + str(is_BS(B2))
@@ -171,6 +175,7 @@ def main(args):
     print "Test 09: False / " + str(is_BS(B9))
     print "Test 10: False / " + str(is_BS(B10))
     print "Test 11: True  / " + str(is_BS(B11))
+    print "Test 12: False / " + str(is_BS(B12))
 
     return 0
 if __name__ == '__main__':
