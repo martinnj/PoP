@@ -20,51 +20,49 @@ def linRegrAn(d):
     a    = 0.0
 
     # Udregn gennemsnittet af alle x'er og y'er.
-    for pair in d.iteritems():
-        xsum += float(pair[0])
-        ysum += float(pair[1])
+    xsum = sum(map(lambda x: float(x[0]), d.iteritems()))
+    ysum = sum(map(lambda x: float(x[1]), d.iteritems()))
     xsnit = xsum/len(d)
     ysnit = ysum/len(d)
 
     # Udregn summen af afvigelsersnes kvadrater og produkterne.
-    for pair in d.iteritems():
-        sak += pow((float(pair[0]) - xsnit) ,2)
-        sap += (float(pair[0]) - xsnit) * float(pair[1])
+    f = lambda x: pow((float(x[0]) - xsnit) ,2)
+    g = lambda x: (float(x[0]) - xsnit) * float(x[1])
+    sak = sum(map(f,d.iteritems()))
+    sap = sum(map(g,d.iteritems()))
     a = sap/sak
 
     # Lambda funktion til at udregne den lineære regression.
-    f = lambda x: a * (float(x) - xsnit) + ysnit
+    h = lambda x: a * (float(x) - xsnit) + ysnit
 
     # Mindste og største x værdi.
-    xmin = min(d.iteritems())[0]
-    xmax = max(d.iteritems())[0]
+    xmin = min(map(lambda x: float(x) ,d.keys()))
+    xmax = max(map(lambda x: float(x) ,d.keys()))
 
-    return ([xmin, xmax], [f(xmin), f(xmax)])
+    return ([xmin, xmax], [h(xmin), h(xmax)])
 
 def danHashtabel(filnavn):
     """
     Returnere en hashtabel ud fra indholdet af en fil.
     @param filnavn en streng med den absolutte sti til en fil med observationer.
     """
+    tabel = {}
+
     # Se om filen eksistere.
     if not(os.path.exists(filnavn)):
-        raise IOError("Filen " + filnavn + " blev ikke fundet.")
-
-    tabel = {}
+        raise ValueError("Filen blev ikke fundet.")
 
     # Forsøg at læse linjerne i filen, hvis det ikke lykkedes så
     # udskriv passende fejl og returner en tom hashtabel.
     try:
         lines = [line.strip() for line in open(filnavn)]
     except IOError:
-        print "IOError: Filen " + filnavn + " kunne ikke åbnes."
-        return tabel
+        raise IOError("Filen kunne ikke åbnes.")
 
     # Hvis der ikke var nogen linjer i filen så skriv en passende fejl
     # og returner en tom hashtabel.
     if (len(lines) < 1):
-        print "Filen " + filnavn + " var tom."
-        return tabel
+        raise ValueError("Filen var tom.")
 
     # Parse alle linjerne, eller smid en fejl for ugyldigt syntax.
     for line in lines:
@@ -73,7 +71,7 @@ def danHashtabel(filnavn):
             y = line.split(',')[1].strip()
             tabel[x] = y
         except:
-            raise Exception("Filen har ugyldigt syntax, sørg for formatet 'x.xx , y.yy'")
+            raise Exception(u"Filen har ugyldigt syntax, sørg for formatet 'x.xx , y.yy'")
     # Returner hashtabellen.
     return tabel
 
@@ -81,12 +79,23 @@ def main(args):
     """
     Main function for at tillade brug som modul og som kørtbart script.
     """
-    #sti = "D:/Dropbox/4th year/Blok 2 - PoP/ugeopgaver/flueæg.txt"
-    #sti2 = "D:/Dropbox/4th year/Blok 2 - PoP/ugeopgaver/pattedyr.txt"
-    sti = "flueæg.txt"
+
+    sti = u"flueæg.txt"
+
 
     # Kode fra ugesedlen.
-    plt.plot(* linRegrAn(danHashtabel(sti)))
+    tabel = danHashtabel(sti)
+    xs,ys = zip(*tabel.items())
+    analyse = linRegrAn(tabel)
+
+    plt.plot(xs,ys,'b^',label=u"Datapunkter fra måling.")
+    plt.plot(* analyse, label=u"Linear regressionsanalyse af data.")
+
+    plt.xlabel(u"Luftfugtighed i %")
+    plt.ylabel(u"Antal timer for udklækning")
+    plt.title(u"Flueægs udklækningstid som en funktion af  luftfugtigheden")
+    plt.legend(loc=1, borderaxespad=0.)
+
     plt.show()
     return 0
 if __name__ == '__main__':
