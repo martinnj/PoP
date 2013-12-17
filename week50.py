@@ -93,7 +93,7 @@ def main(args):
 
     plt.xlabel(u"Luftfugtighed i %")
     plt.ylabel(u"Antal timer for udklækning")
-    plt.title(u"Flueægs udklækningstid som en funktion af  luftfugtigheden")
+    plt.title(u"Flueægs udklækningstid som en funktion af luftfugtigheden")
     plt.legend(loc=1, borderaxespad=0.)
 
     plt.show()
