@@ -81,10 +81,17 @@ Inddata: sti En streng med stien til en fil af formatet :
 Dvs. en mxn matrice bygget af linjer som rækker, med kommaseparerede tal som søjler,
 eller en tom fil.
 (PostCondition)
-Matricen opdateres med værdierne og størrelsen fra filen.
+Matricen er opdateret med værdierne og størrelsen fra filen.
+Hvis der fremkommer en exception når filen tilgås vil funktionen returnere
+og matricen vil være uændret.
         """
         self.vaerdier = []
-        f = open(sti,'r')
+        try:
+            f = open(sti,'r')
+        except:
+            print "Filen: \"" + sti + "\" kunne ikke læses. Matricens indhold er urørt."
+            return
+
         for line in f:
             tmp = line.strip().split(',')
             if (len(tmp) >0) and (tmp[0] <> ''):
@@ -92,7 +99,10 @@ Matricen opdateres med værdierne og størrelsen fra filen.
             self.vaerdier.append(tmp)
         self.m = len(self.vaerdier)
         self.n = len(self.vaerdier[0])
-        f.close()
+        try:
+            f.close()
+        except ex:
+            print "Kunne ikke lukke filen: \"" + sti + "\" : " + ex.message
 
     def write(self, sti):
         """
@@ -100,12 +110,27 @@ Skriver en matrice til en fil.
 (PreCondition)
 Inddata: sti En streng med stien til, hvor matricen skal gemmes.
 (PostCondition)
-Matricen skrives til filen det angivne sted.
+Matricen er skrevet til den angivne fil.
+Hvis der fremkommer en exception ved tilgang/skrivning til filen vil funktionen
+afbrydes. En eventuel tom fil kan fremkomme hvis exceptionen skete under
+skrivning.
         """
-        f = open(sti,'wb')
-        f.write(self.__str__())
-        f.write("\n")
-        f.close()
+        try:
+            f = open(sti,'wb')
+        except ex:
+            print "Filen: \"" + sti + "\" kunne ikke åbnes: " + ex.message
+            return
+        try:
+            f.write(self.__str__())
+            f.write("\n")
+        except ex:
+            print "Der skete en fejl under skrivning til \"" +sti + "\" : " + ex.message
+
+        try:
+            f.close()
+        except ex:
+            print "Kunne ikke lukke filen: \"" + sti + "\" : " + ex.message
+
 
     def __add__(A, B):
         """
@@ -221,7 +246,11 @@ def main(args):
     B.read("testme.matrix")
     print A == B
 
-    print simplematrix().write("testme.matrix") == simplematrix().read("testme.matrix")
+    A = simplematrix(2,3)
+    A.write("testme.matrix")
+    B = simplematrix()
+    B.read("testme.matrix")
+    print A == B
     return 0
 
 if __name__ == '__main__':
