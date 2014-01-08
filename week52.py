@@ -1,7 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
 
-# Ugeopgave for uge 52 af Martin Jørgensen og Sarah Vang Nøhr.
+# Ugeopgave for uge 1 af Martin Jørgensen og Sarah Vang Nøhr.
 
 import sys
 
@@ -42,7 +42,10 @@ Uddata: en mxn matrice hvor alle værdier er draget i rækkefølge fra listen.
         self.vaerdier = []
         k = 0
         harVaerdier = False
-        if (len(vaerdier) > 0):
+        antalVaerdier = len(vaerdier)
+        if (antalVaerdier > 0):
+            if (antalVaerdier != m*n):
+                raise ValueError("Antallet af værdier er ikke det samme som antallet af celler i den ønskede matrice.")
             harVaerdier = True
         for i in range(m):
             tmp = []
@@ -74,7 +77,7 @@ Uddata: en string med værdierne i matricen i tabelformat.
         """
 Læser en matrice fra en fil.
 (PreCondition)
-Inddata: sti En streng med stien til en fil af formatet :
+Inddata: sti En streng med en gyldig sti til en fil af formatet :
 1,2,3,4
 5,6,7,8
 9,10,11,12
@@ -89,8 +92,7 @@ og matricen vil være uændret.
         try:
             f = open(sti,'r')
         except:
-            print "Filen: \"" + sti + "\" kunne ikke læses. Matricens indhold er urørt."
-            return
+            raise IOError("Filen: \"" + sti + "\" kunne ikke læses. Matricens indhold er urørt.")
 
         for line in f:
             tmp = line.strip().split(',')
@@ -101,35 +103,33 @@ og matricen vil være uændret.
         self.n = len(self.vaerdier[0])
         try:
             f.close()
-        except ex:
-            print "Kunne ikke lukke filen: \"" + sti + "\" : " + ex.message
+        except IOError as ex:
+            raise IOError("Kunne ikke lukke filen: \"" + sti + "\" : " + ex.message)
 
     def write(self, sti):
         """
 Skriver en matrice til en fil.
 (PreCondition)
-Inddata: sti En streng med stien til, hvor matricen skal gemmes.
+Inddata: sti En streng med en gyldig sti til, hvor matricen skal gemmes.
 (PostCondition)
 Matricen er skrevet til den angivne fil.
-Hvis der fremkommer en exception ved tilgang/skrivning til filen vil funktionen
-afbrydes. En eventuel tom fil kan fremkomme hvis exceptionen skete under
-skrivning.
+Hvis filen der forsøges at skrive til en ugyldig sti vil en IOError blive kastet.
+Hvis der opstår en fejl under skrivning eller lukning af filen vil en IOError blive kastet.
         """
         try:
             f = open(sti,'wb')
-        except ex:
-            print "Filen: \"" + sti + "\" kunne ikke åbnes: " + ex.message
-            return
+        except IOError as ex:
+            raise IOError("\"" + sti + "\" Kunne ikke åbnes: " + ex.message)
         try:
             f.write(self.__str__())
             f.write("\n")
-        except ex:
-            print "Der skete en fejl under skrivning til \"" +sti + "\" : " + ex.message
+        except IOError as ex:
+            raise IOError("Der skete en fejl under skrivning til \"" +sti + "\" : " + ex.message)
 
         try:
             f.close()
-        except ex:
-            print "Kunne ikke lukke filen: \"" + sti + "\" : " + ex.message
+        except IOError as ex:
+            raise IOError("Kunne ikke lukke filen: \"" + sti + "\" : " + ex.message)
 
 
     def __add__(A, B):
@@ -140,7 +140,10 @@ Inddata: A En matrice af størrelsen mxn.
 Inddata: B En matrice af størrelsen mxn (dvs. samme størrelse som A).
 (PostCondition)
 Uddata: En matrice af størrelsen mxn indeholdende de adderede værdier fra A og B.
+Hvis matricerne ikke har samme størrelse vil der kastes en ValueError.
         """
+        if (A.m != B.m) or (A.n != B.n):
+            raise ValueError("Matricerne A og B har forskellige størrelser.")
         tmp = []
         for i in range(A.m):
             for j in range(A.n):
@@ -163,16 +166,16 @@ Uddata: En matrice af størrelsen mxo indeholdende prikproduktet af A og B.
                     C.vaerdier[i][j] = C.vaerdier[i][j] + A.vaerdier[i][k] * B.vaerdier[k][j]
         return C
 
-    def __cmp__(A, B):
-        """
-Tjekker, om to matricer er ens.
-(PreCondition)
-Inddata: A En matrice.
-Inddata: B En matrice.
-(PostCondition)
-Uddata: Returnerer True, hvis A og B er ens, ellers returneres False.
-        """
-        return __eq__(A, B)
+#     def __cmp__(A, B):
+#         """
+# Tjekker, om to matricer er ens.
+# (PreCondition)
+# Inddata: A En matrice.
+# Inddata: B En matrice.
+# (PostCondition)
+# Uddata: Returnerer True, hvis A og B er ens, ellers returneres False.
+#         """
+#         return __eq__(A, B)
 
     def __eq__(A, B):
         """
